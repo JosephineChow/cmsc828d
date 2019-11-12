@@ -1,0 +1,317 @@
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+
+      // Load the Visualization API and the controls package.
+      google.charts.load('current', {'packages':['corechart', 'controls']});
+      google.charts.load('current', {'packages': ['corechart']});     
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawDashboard);
+
+      // Callback that creates and populates a data table,
+      // instantiates a dashboard, a range slider and a pie chart,
+      // passes in the data and draws it.
+      function drawDashboard(jsonData) {
+      	console.log("begin");
+      	console.log(new Date().getTime());
+	    d = JSON.parse(jsonData);
+		var data = new google.visualization.DataTable();
+		header = d[0].slice(1);
+		data.addColumn('date', "year");
+		for(h in header) {
+			data.addColumn('number', header[h]);
+		}
+		var d2 = d.slice(1).map(x=>[new Date(x[0],0,1,0,0)].concat(x.slice(1)));
+		console.log(d2);
+		data.addRows(d2);
+
+        // Create a dashboard.
+        var dashboard = new google.visualization.Dashboard(
+            document.getElementById('dashboard_div'));
+
+        // Create a range slider, passing some options
+        var yearRangeSlider = new google.visualization.ControlWrapper({
+          'controlType': 'ChartRangeFilter',
+          'containerId': 'filter_div',
+          'options': {
+          	'ui': {
+          		'chartOptions': {
+          		            'width': 800,
+          		            'height': 100,
+          		        }
+        },
+            'filterColumnLabel': 'year',
+          }
+        });
+
+        // Create a pie chart, passing some options
+        var lineChart = new google.visualization.ChartWrapper({
+          'chartType': 'Line', //Line, LineChart
+          'title': 'Count of each word recorded in books between chosen year',
+          'containerId': 'chart_div',
+          'options': {
+            'width': 900,
+            'height': 450,
+            'pieSliceText': 'value',
+            //'legend': 'right',
+            'legend': {position: 'right', textStyle: {fontSize: 2}},
+            hAxis: {
+            	'format': 'yyyy',
+            	'title': 'Year'
+        	},
+	        vAxis: {
+	          'title': 'Count'
+	        }
+
+
+
+          }
+        });
+
+        dashboard.bind(yearRangeSlider, lineChart);
+
+        // Draw the dashboard.
+        dashboard.draw(data);
+        console.log("end");
+        console.log(new Date().getTime());
+        hidden = [];
+
+        document.getElementById("button").addEventListener("click",onClick);
+        function onClick() {
+
+            	var view = new google.visualization.DataView(data);
+            	hidden = [];
+            	dashboard.draw(view);
+            
+        }
+
+
+        google.visualization.events.addListener(lineChart, 'select', selectHandler);
+
+
+        function selectHandler() {
+        	var sel = lineChart.getChart().getSelection();
+        	//console.log(sel);
+
+
+			if (sel.length > 0) {
+            // if row is null, we clicked on the legend
+	            if (sel[0].row == null) {
+	                var col = sel[0].column;
+	                ind = hidden.indexOf(col)
+	                if (ind == -1) { //add to hidden
+	                    // hide the data series
+	                    hidden.push(col);
+
+	                }
+	                else {
+	                    // show the data series
+	                    hidden.splice(ind,1);
+	                    //delete hidden[ind];
+	                }
+	                var view = new google.visualization.DataView(data);
+	                view.hideColumns(hidden);
+	                dashboard.draw(view);
+	            }// end if 
+
+	        } 
+        }
+      }
+
+
+
+
+
+google.charts.load('current', {packages: ['corechart', 'bar']});
+
+	function drawBar_works(jsonData) {
+		d = JSON.parse(jsonData);
+	  var data = google.visualization.arrayToDataTable(d);
+
+	      var options = {
+	        title: 'Count of words recorded in books by 50 year intervals',
+	        chartArea: {width: '50%'},
+	        hAxis: {
+	          title: 'Count',
+	          minValue: 0
+	        },
+	        vAxis: {
+	          title: 'Year (50 years interval)'
+	        }
+	      };
+
+	      var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+
+	      chart.draw(data, options);
+	}//end drawBar 
+
+
+
+google.charts.load('current', {packages: ['corechart', 'bar']});
+
+	function drawBar(jsonData) {
+		console.log("begin");
+		console.log(new Date().getTime());
+	    d = JSON.parse(jsonData);
+		var data = new google.visualization.DataTable();
+		header = d[0].slice(1);
+		data.addColumn('date', "year");
+		data.addColumn('number', "Overall");
+		var d2 = d.slice(1).map(x=>[new Date(x[0],0,1,0,0)].concat(x.slice(1)));
+		//console.log(d2);
+		data.addRows(d2);
+		//console.log(d2);
+
+        // Create a dashboard.
+        var dashboard = new google.visualization.Dashboard(
+            document.getElementById('dashboard_div'));
+
+        // Create a range slider, passing some options
+        var yearRangeSlider = new google.visualization.ControlWrapper({
+          'controlType': 'ChartRangeFilter',
+          'containerId': 'filter_div',
+          'options': {
+          	'ui': {
+          		'chartOptions': {
+          		            'width': 800,
+          		            'height': 100,
+          		        }
+        },
+            'filterColumnLabel': 'year',
+          }
+        });
+
+        // Create a pie chart, passing some options
+        var lineChart = new google.visualization.ChartWrapper({
+          'chartType': 'ColumnChart', //Line, LineChart
+          'containerId': 'chart_div',
+          'options': {
+	        title: 'Count of words recorded in books by year',
+
+            'width': 900,
+            'height': 450,
+            'pieSliceText': 'value',
+            //'legend': 'right',
+            'legend': {position: 'right', textStyle: {fontSize: 8}},
+            hAxis: {
+            	'format': 'yyyy',
+            	title: 'Year'
+        	},
+	        vAxis: {
+	          title: 'Count'
+	        }
+
+
+          }
+        });
+
+        dashboard.bind(yearRangeSlider, lineChart);
+
+        // Draw the dashboard.
+        dashboard.draw(data);
+        console.log("end");
+        console.log(new Date().getTime());
+
+
+	}//end drawBar 
+
+
+
+        window.addEventListener("load",firstLoad);
+        function firstLoad() {
+			var jsonData = $.ajax({
+		          url: "/data",
+		          dataType: "json",
+		          async: false
+		          }).responseText;
+	        drawDashboard(jsonData);
+
+
+		      // tab 
+		      document.getElementById("tab").addEventListener("change",onTab);
+		      document.getElementById("year_tab").addEventListener("change",onTab);
+
+		        function onTab(e) {
+		        	l = document.getElementById("tab").value;
+		        	y = document.getElementById("year_tab").value;
+		            var jsonData = $.ajax({
+			          url: "/other_len?l="+l+"&y="+y,
+			          dataType: "json",
+			          async: false
+			          }).responseText;
+		            alert(l);
+		            //console.log(jsonData);
+		            if (l == "0" || y == "0") {
+		            	drawBar(jsonData);
+		        	} else {
+		        		drawDashboard(jsonData);
+		        	}//end else 
+		        }
+	    }
+
+    </script>
+  </head>
+
+  <body>
+    <!--Div that will hold the dashboard-->
+    <div id="dashboard_div">
+      <!--Divs that will hold each control and chart-->
+      <div id="chart_div"></div>
+    <div id="filter_div"></div>
+
+    <h4> Length of word </h4>
+    <select id="tab">
+	  <option value="0">ALL</option>
+	  <option value="2">2</option>
+	  <option value="3">3</option>
+	  <option value="4">4</option>
+	  <option value="5">5</option>
+	  <option value="6">6</option>
+	  <option value="7">7</option>
+	  <option value="8">8</option>
+	  <option value="9">9</option>
+	  <option value="10">10</option>
+	  <option value="11">11</option>
+	  <option value="12">12</option>
+	  <option value="13">13</option>
+	  <option value="14">14</option>
+	  <option value="15">15</option>
+	  <option value="16">16</option>
+	  <option selected value="17">17</option>
+	  <option value="18">18</option>
+	  <option value="19">19</option>
+	  <option value="20">20</option>
+	  <option value="21">21</option>
+	  <option value="22">22</option>
+	  <option value="23">23</option>
+	  <option value="24">24</option>
+	  <option  value="25">&gt;=25</option>
+	</select>
+
+    <h4> Time Period </h4>
+    <select id="year_tab">
+	  <option value="0">ALL</option>
+	  <option value="1500">1500-1550</option>
+	  <option value="1550">1550-1600</option>
+	  <option value="1600">1600-1650</option>
+	  <option value="1650">1650-1700</option>
+	  <option value="1700">1700-1750</option>
+	  <option value="1750">1750-1800</option>
+	  <option value="1800">1800-1850</option>
+	  <option selected value="1850">1850-1900</option>
+	  <option value="1900">1900-1950</option>
+	  <option value="1950">1950-2000</option>
+	  <option value="2000">2000-2008</option>
+	</select>
+
+	<h4> Reset button </h4>
+      <button id="button">Reset me</button>
+    </div>
+  </body>
+</html>
+
+
